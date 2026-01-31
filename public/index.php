@@ -2,6 +2,35 @@
 require_once __DIR__ . '/../src/Router.php';
 require_once __DIR__ . '/../config/database.php';
 
+// Auto-setup: crear base de datos si no existen las tablas
+try {
+    $db = Database::getInstance()->getConnection();
+    $tables = $db->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+    
+    if (empty($tables)) {
+        // Las tablas no existen, ejecutar setup
+        $sql = file_get_contents(__DIR__ . '/../database/schema.sql');
+        $sql = preg_replace('/--[^\n]*\n/', '', $sql);
+        
+        $statements = array_filter(
+            array_map('trim', explode(';', $sql)),
+            function($stmt) {
+                return !empty($stmt) && 
+                       !preg_match('/^CREATE DATABASE/', $stmt) &&
+                       !preg_match('/^USE /', $stmt);
+            }
+        );
+
+        foreach ($statements as $statement) {
+            if (!empty($statement)) {
+                $db->exec($statement);
+            }
+        }
+    }
+} catch (Exception $e) {
+    // Ignorar si falla, continuar normalmente
+}
+
 // Autoloader simple
 spl_autoload_register(function ($class) {
     $file = __DIR__ . '/../src/' . str_replace('\\', '/', $class) . '.php';
