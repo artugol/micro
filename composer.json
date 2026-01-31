@@ -1,0 +1,19 @@
+{
+    "name": "microframework",
+    "description": "MicroFramework PHP simple con MVC para Railway",
+    "version": "1.0.0",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "start": "php -S localhost:8000 -t public"
+    }
+}
